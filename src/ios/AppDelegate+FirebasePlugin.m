@@ -49,17 +49,17 @@
 
     // get GoogleService-Info.plist file path
     NSString *filePath = [[NSBundle mainBundle] pathForResource:@"GoogleService-Info" ofType:@"plist"];
-    
+
     // if file is successfully found, use it
     if(filePath){
         NSLog(@"GoogleService-Info.plist found, setup: [FIRApp configureWithOptions]");
         // create firebase configure options passing .plist as content
         FIROptions *options = [[FIROptions alloc] initWithContentsOfFile:filePath];
-        
+
         // configure FIRApp with options
         [FIRApp configureWithOptions:options];
     }
-    
+
     // no .plist found, try default App
     if (![FIRApp defaultApp] && !filePath) {
         NSLog(@"GoogleService-Info.plist NOT FOUND, setup: [FIRApp defaultApp]");
@@ -213,5 +213,35 @@
     NSLog(@"%@", [remoteMessage appData]);
 }
 #endif
+
+// [START continueuseractivity]
+- (BOOL)identity_application:(UIApplication *)application
+        continueUserActivity:(NSUserActivity *)userActivity
+          restorationHandler:(void (^)(NSArray *))restorationHandler {
+    FirebasePlugin* dl = [self.viewController getCommandInstance:@"FirebaseDynamicLinks"];
+
+    BOOL handled = [[FIRDynamicLinks dynamicLinks]
+        handleUniversalLink:userActivity.webpageURL
+        completion:^(FIRDynamicLink * _Nullable dynamicLink, NSError * _Nullable error) {
+            // Try this method as some dynamic links are not recognize by handleUniversalLink
+            // ISSUE: https://github.com/firebase/firebase-ios-sdk/issues/743
+            dynamicLink = dynamicLink ? dynamicLink
+                : [[FIRDynamicLinks dynamicLinks]
+                   dynamicLinkFromUniversalLinkURL:userActivity.webpageURL];
+
+            if (dynamicLink) {
+                [dl postDynamicLink:dynamicLink];
+            }
+        }];
+
+    if (handled) {
+        return YES;
+    }
+
+    return [self identity_application:application
+                 continueUserActivity:userActivity
+                   restorationHandler:restorationHandler];
+}
+// [END continueuseractivity]
 
 @end

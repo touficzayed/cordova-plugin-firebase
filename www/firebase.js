@@ -167,3 +167,8 @@ exports.verifyPhoneNumber = function (number, timeOutDuration, success, error) {
 exports.clearAllNotifications = function (success, error) {
   exec(success, error, "FirebasePlugin", "clearAllNotifications", []);
 };
+
+
+exports.onDynamicLink = function (success, error) {
+    exec(success, error, "FirebasePlugin", "onDynamicLink", []);
+};
