@@ -10,6 +10,10 @@ xmlns:android="http://schemas.android.com/apk/res/android">
 		<engine name="cordova" version=">=3.2.0" />
 	</engines>
 
+	<preference name="APP_DOMAIN" />
+	<preference name="PAGE_LINK_DOMAIN" />
+
+
 	<platform name="android">
 		<hook type="after_plugin_install" src="scripts/android/after_plugin_install.js" />
 		<hook type="before_plugin_uninstall" src="scripts/android/before_plugin_uninstall.js" />
@@ -43,6 +47,22 @@ xmlns:android="http://schemas.android.com/apk/res/android">
 				</intent-filter>
 			</service>
 			<receiver android:name="org.apache.cordova.firebase.OnNotificationOpenReceiver"></receiver>
+		</config-file>
+		<config-file target="AndroidManifest.xml" parent="/manifest/application/activity">
+			<intent-filter>
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.BROWSABLE" />
+				<data android:host="$APP_DOMAIN" android:scheme="http"/>
+				<data android:host="$APP_DOMAIN" android:scheme="https"/>
+			</intent-filter>
+			<intent-filter android:autoVerify="true">
+				<action android:name="android.intent.action.VIEW"/>
+				<category android:name="android.intent.category.DEFAULT"/>
+				<category android:name="android.intent.category.BROWSABLE"/>
+				<data android:host="$PAGE_LINK_DOMAIN" android:scheme="http"/>
+				<data android:host="$PAGE_LINK_DOMAIN" android:scheme="https"/>
+			</intent-filter>
 		</config-file>
 		<resource-file src="src/android/google-services.json" target="."/>
 		<resource-file src="src/android/cordova-plugin-firebase-strings.xml" target="res/values/cordova-plugin-firebase-strings.xml" />
@@ -82,7 +102,19 @@ xmlns:android="http://schemas.android.com/apk/res/android">
 		<config-file parent="aps-environment" target="*/Entitlements-Release.plist">
 			<string>production</string>
 		</config-file>
+		<config-file target="*-Debug.plist" parent="com.apple.developer.associated-domains">
+			<array>
+				<string>applinks:$APP_DOMAIN</string>
+				<string>applinks:$PAGE_LINK_DOMAIN</string>
+			</array>
+		</config-file>
 
+		<config-file target="*-Release.plist" parent="com.apple.developer.associated-domains">
+			<array>
+				<string>applinks:$APP_DOMAIN</string>
+				<string>applinks:$PAGE_LINK_DOMAIN</string>
+			</array>
+		</config-file>
 		<resource-file src="src/ios/GoogleService-Info.plist" />
 
 		<header-file src="src/ios/AppDelegate+FirebasePlugin.h" />

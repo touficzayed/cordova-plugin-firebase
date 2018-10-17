@@ -66,6 +66,7 @@ public class FirebasePlugin extends CordovaPlugin {
     private static ArrayList<Bundle> notificationStack = null;
     private static CallbackContext notificationCallbackContext;
     private static CallbackContext tokenRefreshCallbackContext;
+    private CallbackContext dynamicLinkCallback;
 
     @Override
     protected void pluginInitialize() {
@@ -317,7 +318,9 @@ public class FirebasePlugin extends CordovaPlugin {
         if (data != null && data.containsKey("google.message_id")) {
             data.putBoolean("tap", true);
             FirebasePlugin.sendNotification(data, this.cordova.getActivity().getApplicationContext());
-        }
+        } else if (this.dynamicLinkCallback != null) {
+           respondWithDynamicLink(intent);
+       }
     }
 
     // DEPRECTED - alias of getToken
@@ -747,7 +750,7 @@ public class FirebasePlugin extends CordovaPlugin {
                             try {
                                 String verificationId = null;
                                 String code = null;
-								
+
                                 Field[] fields = credential.getClass().getDeclaredFields();
                                 for (Field field : fields) {
                                     Class type = field.getType();
@@ -814,7 +817,7 @@ public class FirebasePlugin extends CordovaPlugin {
                             callbackContext.sendPluginResult(pluginresult);
                         }
                     };
-	
+
                     PhoneAuthProvider.getInstance().verifyPhoneNumber(number, // Phone number to verify
                             timeOutDuration, // Timeout duration
                             TimeUnit.SECONDS, // Unit of timeout
@@ -827,7 +830,7 @@ public class FirebasePlugin extends CordovaPlugin {
             }
         });
     }
-	
+
     private static String getPrivateField(PhoneAuthCredential credential, Field field) {
         try {
             field.setAccessible(true);
@@ -968,5 +971,36 @@ public class FirebasePlugin extends CordovaPlugin {
                 }
             }
         });
+    }
+
+    @CordovaMethod
+    private void onDynamicLink(CallbackContext callbackContext) {
+        this.dynamicLinkCallback = callbackContext;
+
+        respondWithDynamicLink(cordova.getActivity().getIntent());
+    }
+
+    private void respondWithDynamicLink(Intent intent) {
+        FirebaseDynamicLinks.getInstance().getDynamicLink(intent)
+            .continueWith(new Continuation<PendingDynamicLinkData, JSONObject>() {
+                @Override
+                public JSONObject then(Task<PendingDynamicLinkData> task) throws JSONException {
+                    PendingDynamicLinkData data = task.getResult();
+
+                    JSONObject result = new JSONObject();
+                    result.put("deepLink", data.getLink());
+                    result.put("clickTimestamp", data.getClickTimestamp());
+                    result.put("minimumAppVersion", data.getMinimumAppVersion());
+
+                    if (dynamicLinkCallback != null) {
+                        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, result);
+                        pluginResult.setKeepCallback(true);
+                        dynamicLinkCallback.sendPluginResult(pluginResult);
+                        dynamicLinkCallback=null;
+                    }
+
+                    return result;
+                }
+            });
     }
 }
