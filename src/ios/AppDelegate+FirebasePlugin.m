@@ -240,7 +240,7 @@
 - (BOOL)identity_application:(UIApplication *)application
         continueUserActivity:(NSUserActivity *)userActivity
           restorationHandler:(void (^)(NSArray *))restorationHandler {
-    FirebasePlugin* dl = [self.viewController getCommandInstance:@"FirebaseDynamicLinks"];
+    FirebasePlugin* dl = [self.viewController getCommandInstance:@"FirebasePlugin"];
 
     BOOL handled = [[FIRDynamicLinks dynamicLinks]
         handleUniversalLink:userActivity.webpageURL
