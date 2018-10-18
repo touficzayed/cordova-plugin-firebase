@@ -1,5 +1,11 @@
 package org.apache.cordova.firebase;
 
+
+import com.google.android.gms.tasks.Continuation;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
+
+
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
