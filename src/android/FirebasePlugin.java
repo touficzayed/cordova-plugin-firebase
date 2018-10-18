@@ -202,6 +202,9 @@ public class FirebasePlugin extends CordovaPlugin {
         } else if (action.equals("clearAllNotifications")) {
             this.clearAllNotifications(callbackContext);
             return true;
+        } else if (action.equals("onDynamicLink")) {
+            this.onDynamicLink(callbackContext);
+            return true;
         }
 
         return false;
@@ -973,7 +976,7 @@ public class FirebasePlugin extends CordovaPlugin {
         });
     }
 
-    @CordovaMethod
+
     private void onDynamicLink(CallbackContext callbackContext) {
         this.dynamicLinkCallback = callbackContext;
 
