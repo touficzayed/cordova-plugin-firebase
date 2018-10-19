@@ -37,6 +37,7 @@ static FirebasePlugin *firebasePlugin;
 - (void)pluginInitialize {
     NSLog(@"Starting Firebase plugin");
     firebasePlugin = self;
+    [FIRApp configure];
 }
 
 - (void)getId:(CDVInvokedUrlCommand *)command {
